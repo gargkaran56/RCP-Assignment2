@@ -1,0 +1,117 @@
+---
+title: "assignment-2"
+author: "Karan Garg"
+date: "08/04/2021"
+output:
+  bookdown::html_document2: default
+  bookdown::pdf_document2: default
+keep_md: true  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(kableExtra)
+library(bookdown)
+library(knitr)
+library(ggplot2)
+```
+
+```{r reading-data,include=FALSE}
+data <- read.csv(here::here("Data/strokes.csv"))
+```
+
+
+# Introduction to the research question and context 
+
+I work for **World Health Organisation (WHO)** and they have asked me to analyse the **Stroke_Prediction_Dataset** avaiable [here](https://www.kaggle.com/fedesoriano/stroke-prediction-dataset) .
+
+According to the **World Health Organization (WHO)** stroke is the 2nd leading cause of death globally, responsible for approximately 11% of total deaths. 
+This dataset is used to predict whether a patient is likely to get a stroke based on the input parameters like gender, age, various diseases, and smoking status. Each row in the data provides relavant information about the patient.
+
+*	It is a tabular dataset comprising of 5111 rows and 12 columns.
+
+For this assignment I have reduced and cleaned the data according to my research questions.
+The dimensions of the new data are `r dim(data)`
+
+The attributes of the new dataset are:
+
+`r names(data) %>% kable() %>% kable_styling(bootstrap_options =c("basic","striped"))`
+
+The Preview of the Dataset is shown below:
+
+`r head(data) %>% kable() %>% kable_styling(bootstrap_options =c("basic","striped"))`
+
+Following are my research questions:
+
+* __What is the ratio of *Strokes* in males depending upon their work type and are they married or not?__
+* __What is the ratio of *Hypertension* in males depending upon their work type and are they married or not?__
+
+# Exploratory data analysis
+
+## Tabular View
+
+```{r table1,echo=FALSE}
+
+data %>% 
+  group_by(work_type,ever_married) %>% 
+  summarise(strokes_pct = (sum(stroke)/dim(data)[1])*100,
+            strokes_cnt = sum(stroke)) %>% 
+  kable(booktabs = TRUE,
+        caption = 'Tabular View of Ratio of Males having Strokes depending upon their work type and whether they were Marrried or not') %>% 
+  kable_styling(bootstrap_options = c("basic","striped"))
+```
+
+The Table \@ref(tab:table1) is achieved after grouping the data according to **Work_Type** and  **ever_married** Attribute.
+After that Summarise is used [**Note** : Summarise used because we used group_by function beforehand and mutate does not work with it,hence Summarise] to find the ratio of strokes in males by using the formula (sum.strokes/no of records)*100.
+
+```{r table2,echo=FALSE}
+data %>% 
+  group_by(work_type,ever_married) %>% 
+  summarise(hypertension_pct = (sum(hypertension)/dim(data)[1])*100,
+            hypertension_cnt = sum(hypertension)) %>% 
+  kable(booktabs = TRUE,
+        caption = 'Tabular View of Ratio of Males having Hypertension depending upon their work type and whether they were Marrried or not') %>% 
+  kable_styling(bootstrap_options = c("basic","striped"))
+
+
+```
+
+The Table \@ref(tab:table2) is achieved after grouping the data according to **Work_Type** and  **ever_married** Attribute.
+After that Summarise is used [**Note** : Summarise used because we used group_by function beforehand and mutate does not work with it,hence Summarise] to find the ratio of hypertension in males by using the formula (sum.hypertension/no of records)*100.
+
+## Graphical View
+
+```{r figure1,echo=FALSE,fig.cap="Graphical View of Ratio of Males having Strokes"}
+ggplot(data,aes(work_type,
+                stroke,
+                color = work_type))+
+  geom_histogram(stat = "identity") +
+  facet_wrap(~ever_married)
+```
+
+The Figure \@ref(fig:figure1) is acheived by plotting a **Histgram** of ***stroke*** Vs ***work_type*** attributes and then faceting the ***ever_married*** attribute. In addition the plot is coloured on the basis of ***work_type***.
+
+```{r figure2,echo=FALSE,fig.cap="Graphical View of Ratio of Males having Hypertension"}
+ggplot(data,aes(work_type,
+                hypertension,
+                color = work_type))+
+  geom_histogram(stat = "identity") +
+  facet_wrap(~ever_married)
+```
+                
+The Figure \@ref(fig:figure2) is acheived by plotting a **Histgram** of ***hypertension*** Vs ***work_type*** attributes and then faceting the plot with ***ever_married*** attribute. In addition the plot is coloured on the basis of ***work_type*** .
+
+# Conclusion
+
+We can conclude the following Information from the above tables and figures:
+
+* In Table \@ref(tab:table1), we can clearly notice that males having a private job were the only people affected with stroke out of other categories namely male children and males who never worked.Moreover, out of the affected males mostly all of them were married (**Approx. 5.5 % or 57 males**).The same can also be clearly seen in Figure  \@ref(fig:figure1).
+
+* In Table \@ref(tab:table2), we can clearly notice that males having a private job were the only people affected with hypertension out of other categories namely male children and males who never worked.Moreover, out of the affected males mostly all of them were married (**Approx. 11% or 111 males**).The same can also be clearly seen in Figure  \@ref(fig:figure2).
+
+Hence, We can say that both **Private job** and **marriage** were the key factors for a male to have **stroke** or **hypertension**.
